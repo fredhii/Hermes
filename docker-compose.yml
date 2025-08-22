@@ -23,6 +23,24 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - analytics-network
+
+  # DuckDB Analytics Database
+  duckdb-analytics:
+    image: qldrsc/duckdb:latest
+    container_name: duckdb-analytics
+    volumes:
+      - duckdb-data:/var/lib/duckdb
+      - ./analytics:/analytics
+    ports:
+      - "8080:8080"
+    networks:
+      - analytics-network
+    depends_on:
+      - db
+    # sleep infinite
+    command: sleep infinity
 
   # Chat Publisher (Fredy)
   # chat-publisher:
@@ -31,6 +49,7 @@ services:
   #   depends_on:
   #     - mqtt-broker
   #     - db
+  #     - duckdb-analytics
   #   environment:
   #     MQTT_BROKER_HOST: mqtt-broker
   #     MQTT_TOPIC: "chat/messages"
@@ -38,19 +57,24 @@ services:
   #     POSTGRES_DB: public
   #     POSTGRES_USER: dbowner
   #     POSTGRES_PASSWORD: uX3_YnF3y485NziMN6xW
+  #     DUCKDB_HOST: duckdb-analytics
+  #     DUCKDB_DATABASE: /var/lib/duckdb/analytics.duckdb
   #     CHAT_USER_ID: fredy
   #     CHAT_USER_NAME: Fredy
   #   restart: on-failure
   #   stdin_open: true
   #   tty: true
+  #   networks:
+  #     - analytics-network
 
-  # # Chat Subscriber (David)
+  # Chat Subscriber (David)
   # chat-subscriber:
   #   container_name: chat-subscriber
   #   build: ./python_scripts
   #   depends_on:
   #     - mqtt-broker
   #     - db
+  #     - duckdb-analytics
   #   environment:
   #     MQTT_BROKER_HOST: mqtt-broker
   #     MQTT_TOPIC: "chat/messages"
@@ -58,14 +82,24 @@ services:
   #     POSTGRES_DB: public
   #     POSTGRES_USER: dbowner
   #     POSTGRES_PASSWORD: uX3_YnF3y485NziMN6xW
+  #     DUCKDB_HOST: duckdb-analytics
+  #     DUCKDB_DATABASE: /var/lib/duckdb/analytics.duckdb
   #     CHAT_USER_ID: david
   #     CHAT_USER_NAME: David
   #   restart: on-failure
   #   stdin_open: true
   #   tty: true
+  #   networks:
+  #     - analytics-network
 
 # Define persistent volumes
 volumes:
   mosquitto-data:
   mosquitto-log:
   db-data:
+  duckdb-data:
+
+# Define networks
+networks:
+  analytics-network:
+    driver: bridge

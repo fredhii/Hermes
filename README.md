@@ -279,3 +279,30 @@ docker exec -it alloydb psql -U dbowner -d public -c "\dt"
 ```
 
 For more detailed information, see [python_scripts/README_CHAT.md](python_scripts/README_CHAT.md).
+
+
+### Bonus - DuckDB
+
+```
+root@ee5c00720fe2:/# duckdb
+-- Loading resources from /root/.duckdbrc
+v0.8.1 6536a77232
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+duckdb > INSTALL postgres;
+duckdb > 
+duckdb > LOAD postgres;
+duckdb > -- Scan the table "mytable" from the schema "public" in the database "mydb"
+duckdb > SELECT * FROM postgres_scan('host=db port=5432 dbname=mydb user=dbowner password=uX3_YnF3y485NziMN6xW', 'public', 'chat_messages');
+Error: IO Error: Unable to connect to Postgres at host=db port=5432 dbname=mydb user=dbowner password=uX3_YnF3y485NziMN6xW: connection to server at "db" (172.19.0.2), port 5432 failed: FATAL:  database "mydb" does not exist
+
+duckdb > SELECT * FROM postgres_scan('host=db port=5432 dbname=public user=dbowner password=uX3_YnF3y485NziMN6xW', 'public', 'chat_messages');
+┌──────────────────────┬──────────────────────┬───────────┬─────────────┬─────────────┬─────────┬──────────────┬──────────────────────┬──────────────────────┐
+│          id          │      message_id      │ sender_id │ sender_name │ receiver_id │ content │ message_type │      created_at      │      updated_at      │
+│         uuid         │       varchar        │  varchar  │   varchar   │   varchar   │ varchar │   varchar    │ timestamp with tim…  │ timestamp with tim…  │
+├──────────────────────┼──────────────────────┼───────────┼─────────────┼─────────────┼─────────┼──────────────┼──────────────────────┼──────────────────────┤
+│ 4780c7fe-642d-44d5…  │ 25ab79e2-ea7c-4c46…  │ user1     │ User 1      │ user2       │ hola    │ text         │ 2025-08-22 21:39:2…  │ 2025-08-22 21:39:2…  │
+│ fac9ae08-9fde-4907…  │ 16e7fabc-35be-4e93…  │ fredy     │ Fredy       │ david       │ Hola    │ text         │ 2025-08-22 21:54:1…  │ 2025-08-22 21:54:1…  │
+└──────────────────────┴──────────────────────┴───────────┴─────────────┴─────────────┴─────────┴──────────────┴──────────────────────┴──────────────────────┘
+```
