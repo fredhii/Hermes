@@ -1,0 +1,71 @@
+services:
+  # MQTT Broker
+  mqtt-broker:
+    image: eclipse-mosquitto:2
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # Database
+  db:
+    image: google/alloydbomni:15
+    container_name: alloydb
+    environment:
+      POSTGRES_USER: dbowner
+      POSTGRES_PASSWORD: uX3_YnF3y485NziMN6xW
+      POSTGRES_DB: public
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Chat Publisher (Fredy)
+  # chat-publisher:
+  #   container_name: chat-publisher
+  #   build: ./python_scripts
+  #   depends_on:
+  #     - mqtt-broker
+  #     - db
+  #   environment:
+  #     MQTT_BROKER_HOST: mqtt-broker
+  #     MQTT_TOPIC: "chat/messages"
+  #     POSTGRES_HOST: db
+  #     POSTGRES_DB: public
+  #     POSTGRES_USER: dbowner
+  #     POSTGRES_PASSWORD: uX3_YnF3y485NziMN6xW
+  #     CHAT_USER_ID: fredy
+  #     CHAT_USER_NAME: Fredy
+  #   restart: on-failure
+  #   stdin_open: true
+  #   tty: true
+
+  # # Chat Subscriber (David)
+  # chat-subscriber:
+  #   container_name: chat-subscriber
+  #   build: ./python_scripts
+  #   depends_on:
+  #     - mqtt-broker
+  #     - db
+  #   environment:
+  #     MQTT_BROKER_HOST: mqtt-broker
+  #     MQTT_TOPIC: "chat/messages"
+  #     POSTGRES_HOST: db
+  #     POSTGRES_DB: public
+  #     POSTGRES_USER: dbowner
+  #     POSTGRES_PASSWORD: uX3_YnF3y485NziMN6xW
+  #     CHAT_USER_ID: david
+  #     CHAT_USER_NAME: David
+  #   restart: on-failure
+  #   stdin_open: true
+  #   tty: true
+
+# Define persistent volumes
+volumes:
+  mosquitto-data:
+  mosquitto-log:
+  db-data:
